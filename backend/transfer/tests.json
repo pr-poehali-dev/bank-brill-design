@@ -1,0 +1,18 @@
+{
+  "tests": [
+    {
+      "name": "Transfer money validation",
+      "method": "POST",
+      "body": {
+        "from_user_id": 1,
+        "to_card": "1234567812345678",
+        "amount": 100
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

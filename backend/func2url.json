@@ -1,3 +1,5 @@
 {
+  "transfer": "https://functions.poehali.dev/324fd91b-43aa-4742-b718-3fb2844844c8",
+  "ai-chat": "https://functions.poehali.dev/2323e002-e38c-414e-b4af-a76ecd05a2d0",
   "auth": "https://functions.poehali.dev/019819e4-bdb4-41a5-a033-2e502200b77f"
 }

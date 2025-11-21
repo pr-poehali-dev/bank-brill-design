@@ -1,0 +1,17 @@
+{
+  "tests": [
+    {
+      "name": "Ask AI about cards",
+      "method": "POST",
+      "body": {
+        "message": "Какие у вас есть карты?"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "reply": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

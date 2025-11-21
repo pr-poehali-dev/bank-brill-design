@@ -154,8 +154,8 @@ const Index = () => {
       <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Icon name="Sparkles" className="w-8 h-8 text-primary" />
+            <div className="flex items-center space-x-3">
+              <img src="https://cdn.poehali.dev/projects/4c12594c-86e0-45fc-b360-4939939a0f58/files/8d77fbea-dc20-4b72-94be-da8a6981b39a.jpg" alt="BRILL Logo" className="w-10 h-10 rounded-lg" />
               <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 BRILL
               </span>
