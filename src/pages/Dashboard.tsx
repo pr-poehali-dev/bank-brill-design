@@ -1,0 +1,206 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Icon from '@/components/ui/icon';
+
+interface User {
+  id: number;
+  email: string;
+  full_name: string;
+  balance: number;
+  created_at: string;
+}
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('brill_user');
+    const token = localStorage.getItem('brill_token');
+    
+    if (!userData || !token) {
+      navigate('/');
+      return;
+    }
+    
+    try {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+    } catch (error) {
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('brill_user');
+    localStorage.removeItem('brill_token');
+    navigate('/');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin">
+          <Icon name="Loader2" size={48} className="text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  const recentTransactions = [
+    { id: 1, type: 'income', description: 'Зачисление зарплаты', amount: 85000, date: '2024-11-18' },
+    { id: 2, type: 'expense', description: 'Покупка в магазине', amount: -2500, date: '2024-11-17' },
+    { id: 3, type: 'expense', description: 'Оплата интернета', amount: -800, date: '2024-11-16' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <Icon name="Sparkles" className="w-8 h-8 text-primary" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                BRILL
+              </span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-muted-foreground hidden md:block">{user.email}</span>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <Icon name="LogOut" className="w-4 h-4 mr-2" />
+                Выйти
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">Добро пожаловать, {user.full_name.split(' ')[0]}!</h1>
+            <p className="text-muted-foreground">Управляйте своими финансами в одном месте</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <Card className="col-span-2 bg-gradient-to-br from-primary to-secondary text-white border-0 animate-scale-in">
+              <CardHeader>
+                <CardDescription className="text-white/80">Общий баланс</CardDescription>
+                <CardTitle className="text-5xl font-bold">
+                  {user.balance.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 mt-4">
+                  <Button variant="secondary" className="flex-1">
+                    <Icon name="ArrowUpRight" className="mr-2" />
+                    Пополнить
+                  </Button>
+                  <Button variant="secondary" className="flex-1">
+                    <Icon name="ArrowDownRight" className="mr-2" />
+                    Перевести
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="animate-scale-in" style={{ animationDelay: '100ms' }}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Моя карта</CardTitle>
+                  <Icon name="CreditCard" className="text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">•••• 4242</p>
+                <Button variant="outline" className="w-full">
+                  <Icon name="Plus" className="mr-2 w-4 h-4" />
+                  Заказать карту
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                  <Icon name="Wallet" className="text-primary" />
+                </div>
+                <CardTitle className="text-lg">Вклады</CardTitle>
+                <CardDescription>До 18% годовых</CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-2">
+                  <Icon name="TrendingUp" className="text-secondary" />
+                </div>
+                <CardTitle className="text-lg">Инвестиции</CardTitle>
+                <CardDescription>Начните инвестировать</CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                  <Icon name="Shield" className="text-primary" />
+                </div>
+                <CardTitle className="text-lg">Страхование</CardTitle>
+                <CardDescription>Защитите своё имущество</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Последние операции</CardTitle>
+              <CardDescription>История ваших транзакций</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentTransactions.map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        <Icon 
+                          name={transaction.type === 'income' ? 'ArrowDownLeft' : 'ArrowUpRight'} 
+                          className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}
+                          size={20}
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium">{transaction.description}</p>
+                        <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                      </div>
+                    </div>
+                    <span className={`font-semibold text-lg ${
+                      transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString('ru-RU')} ₽
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" className="w-full mt-4">
+                Показать все операции
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

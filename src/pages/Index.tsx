@@ -1,16 +1,83 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeSection, setActiveSection] = useState('hero');
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [registerForm, setRegisterForm] = useState({ email: '', password: '', full_name: '' });
 
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
     element?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('https://functions.poehali.dev/019819e4-bdb4-41a5-a033-2e502200b77f', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', ...loginForm })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        localStorage.setItem('brill_token', data.token);
+        localStorage.setItem('brill_user', JSON.stringify(data.user));
+        toast({ title: 'Успешно!', description: 'Вы вошли в систему' });
+        setIsAuthOpen(false);
+        navigate('/dashboard');
+      } else {
+        toast({ title: 'Ошибка', description: data.error || 'Не удалось войти', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Проблема с подключением', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('https://functions.poehali.dev/019819e4-bdb4-41a5-a033-2e502200b77f', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'register', ...registerForm })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        localStorage.setItem('brill_token', data.token);
+        localStorage.setItem('brill_user', JSON.stringify(data.user));
+        toast({ title: 'Добро пожаловать!', description: 'Регистрация прошла успешно' });
+        setIsAuthOpen(false);
+        navigate('/dashboard');
+      } else {
+        toast({ title: 'Ошибка', description: data.error || 'Не удалось зарегистрироваться', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Проблема с подключением', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const services = [
@@ -108,8 +175,89 @@ const Index = () => {
               </button>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">Войти</Button>
-              <Button size="sm" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity">
+              <Dialog open={isAuthOpen} onOpenChange={setIsAuthOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm">Войти</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold">Добро пожаловать в BRILL</DialogTitle>
+                    <DialogDescription>Войдите или создайте новый аккаунт</DialogDescription>
+                  </DialogHeader>
+                  <Tabs defaultValue="login" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="login">Вход</TabsTrigger>
+                      <TabsTrigger value="register">Регистрация</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="login" className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="login-email">Email</Label>
+                        <Input 
+                          id="login-email" 
+                          type="email" 
+                          placeholder="your@email.com"
+                          value={loginForm.email}
+                          onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="login-password">Пароль</Label>
+                        <Input 
+                          id="login-password" 
+                          type="password"
+                          value={loginForm.password}
+                          onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-primary to-secondary" 
+                        onClick={handleLogin}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Вход...' : 'Войти'}
+                      </Button>
+                    </TabsContent>
+                    <TabsContent value="register" className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="register-name">ФИО</Label>
+                        <Input 
+                          id="register-name" 
+                          placeholder="Иван Иванов"
+                          value={registerForm.full_name}
+                          onChange={(e) => setRegisterForm({ ...registerForm, full_name: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="register-email">Email</Label>
+                        <Input 
+                          id="register-email" 
+                          type="email" 
+                          placeholder="your@email.com"
+                          value={registerForm.email}
+                          onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="register-password">Пароль</Label>
+                        <Input 
+                          id="register-password" 
+                          type="password"
+                          value={registerForm.password}
+                          onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-primary to-secondary" 
+                        onClick={handleRegister}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Регистрация...' : 'Создать аккаунт'}
+                      </Button>
+                    </TabsContent>
+                  </Tabs>
+                </DialogContent>
+              </Dialog>
+              <Button size="sm" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity" onClick={() => setIsAuthOpen(true)}>
                 Открыть счёт
               </Button>
             </div>
